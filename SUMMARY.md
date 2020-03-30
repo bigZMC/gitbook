@@ -6,6 +6,7 @@
 
 ## ES6标准入门
 
-* [let和const命令](es6/let和const.md) 
+* [let和const命令](es6/let_and_const.md) 
 * [变量的结垢赋值](es6/destructuring.md)
+* [字符串的扩展](es6/string_extension.md)
 

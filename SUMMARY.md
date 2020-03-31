@@ -9,4 +9,7 @@
 * [let和const命令](es6/let_and_const.md) 
 * [变量的结垢赋值](es6/destructuring.md)
 * [字符串的扩展](es6/string_extension.md)
+* [字符串的新增方法](es6/string_new_func.md)
+
+
 

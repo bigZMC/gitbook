@@ -10,6 +10,7 @@
 * [变量的结垢赋值](es6/destructuring.md)
 * [字符串的扩展](es6/string_extension.md)
 * [字符串的新增方法](es6/string_new_func.md)
+* [字符串的常用方法整理](es6/string_func.md)
 
 
 

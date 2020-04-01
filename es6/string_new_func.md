@@ -104,7 +104,7 @@ s.endsWith('!') // true
 s.includes('o') // true
 ```
 
-这三个方法都支持第二个参数，表示开始搜索的位置。
+这三个方法都支持第二个参数，表示开始搜索的位置(position)或者字符长度(length)。
 
 ```javascript
 let s = 'Hello world!';

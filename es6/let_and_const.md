@@ -88,6 +88,12 @@ function func() {
 
 // 报错
 function func() {
+  var a = 1;
+  let a = 10;
+}
+
+// 报错
+function func() {
   let a = 10;
   let a = 1;
 }
@@ -114,6 +120,7 @@ function f() { console.log('I am outside!'); }
 
   f();
 }());
+// I am inside!
 
 // 浏览器的 ES6 环境
 function f() { console.log('I am outside!'); }

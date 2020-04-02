@@ -25,9 +25,12 @@ nvm install <version> // 安装指定版本的node,或者写成latest以安装�
 nvm use version // 切换当前系统的node版本
 ```
 
-最后记得切换一下npm地址到淘宝镜像
+最后我们设置一个全局的`npm`地址，让各个版本的`node`公用
 
 ```javascript
-npm install -g cnpm --registry=https://registry.npm.taobao.org
+1. npm config set prefix "D:\nvm\npm" //配置用npm下载包时全局安装的包路径
+// 安装全局npm，不同的node都使用这个npm，想更新全局的npm的话首先删除全局路径(就是上一行命令的地址,可以使用npm config ls查看)下的npm,再执行一次这个命令即可
+2. npm install -g cnpm --registry=https://registry.npm.taobao.org
+3. 在用户变量中添加 NPM_HOME=D:\nvm\npm，PATH中添加%NPM_HOME%
 ```
 

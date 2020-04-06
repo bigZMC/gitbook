@@ -120,7 +120,7 @@ withinErrorMargin(1.1 + 1.3, 2.4) // true
 
 `Number.MAX_VALUE` 属性值接近于 `1.79E+308`。大于 `MAX_VALUE` 的值代表 "`Infinity`"。 
 
-`Number.MIN_VALUE` 属性表示在 JavaScript 中所能表示的最小的正值，而不是最小的负值。`MIN_VALUE` 的值约为 `5e-324`。小于 `MIN_VALUE` 的值将会转换为 0。  
+`Number.MIN_VALUE` 属性表示在 JavaScript 中所能表示的**最小的正值，而不是最小的负值**。`MIN_VALUE` 的值约为 `5e-324`。小于 `MIN_VALUE` 的值将会转换为 0。  
 
 一定要区分`Number.MIN_VALUE`和`Number.EPSILON`的区别，**`Number.MIN_VALUE`代表最小正值，而`Number.EPSILON`是最小精度。**
 

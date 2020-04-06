@@ -12,6 +12,5 @@
 * [字符串的新增方法](es6/string_new_func.md)
 * [字符串的常用方法整理](es6/string_func.md)
 * [数值的扩展](es6/number_extension.md)
-
-
+* [函数的扩展](es6/func_extension.md)
 

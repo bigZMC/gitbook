@@ -343,4 +343,345 @@ foo.call({ id: 42 });
 // id: 42
 ```
 
-上面代码中，`setTimeout`的参数是一个箭头函数，这个箭头函数的定义生效是在`foo`函数生成时，而它的真正执行要等到 100 毫秒后。如果是普通函数，执行时`this`应该指向全局对象`window`，这时应该输出`21`。但是，箭头函数导致`this`总是指向函数定义生效时所在的对象（本例是`{id: 42}`），所以输出的是`42`。 
+上面代码中，`setTimeout`的参数是一个箭头函数，捕获自己在**定义时**（注意，是定义时，不是调用时）所处的**外层执行环境的this**。这个箭头函数的定义生效是在`foo`函数生成时，而它的真正执行要等到 100 毫秒后。如果是普通函数，执行时`this`应该指向全局对象`window`，这时应该输出`21`。但是，箭头函数导致`this`总是指向函数定义生效时所在的对象（本例是`{id: 42}`），所以输出的是`42`。 
+
+**箭头函数可以让`setTimeout`里面的`this`，绑定定义时所在的作用域，而不是指向运行时所在的作用域。** 
+
+```javascript
+function Timer() {
+  this.s1 = 0;
+  this.s2 = 0;
+  // 箭头函数
+  setInterval(() => this.s1++, 1000);
+  // 普通函数
+  setInterval(function () {
+    this.s2++;
+  }, 1000);
+}
+
+var timer = new Timer();
+var s2 = 0;
+
+setTimeout(() => console.log('s1: ', timer.s1), 3100);
+setTimeout(() => console.log('s2: ', timer.s2, s2), 3100);
+// s1: 3
+// s2: 0 3
+```
+
+`Timer`函数内部设置了两个定时器，分别使用了箭头函数和普通函数。前者的`this`绑定定义时所在的作用域（即`Timer`函数），后者的`this`指向运行时所在的作用域（即全局对象）。所以3100毫秒后，`timer1.s1`被更新了3次，而`timer1.s2`一次都没有更新，被更新的是`window.s2`。
+
+箭头函数可以让`this`指向固定化，这种特性很有利于封装回调函数。 
+
+```javascript
+var handler = {
+  id: '123456',
+
+  init: function() {
+    // 这里this指向handler对象，如果是普通函数，this会指向document
+    document.addEventListener('click', event => this.doSomething(event.type), false);
+  },
+
+  doSomething: function(type) {
+    console.log('Handling ' + type  + ' for ' + this.id);
+  }
+};
+```
+
+`this`指向的固定化，并不是因为箭头函数内部有绑定`this`的机制，实际原因是**箭头函数根本没有自己的`this`，导致内部的`this`就是外层代码块（必须是构成单独作用域）的`this`。**正是因为它没有`this`，所以也就不能用作构造函数。 
+
+所以，箭头函数转成 ES5 的代码如下。
+
+```javascript
+// ES6
+function foo() {
+  setTimeout(() => {
+    console.log('id:', this.id);
+  }, 100);
+}
+
+// ES5
+function foo() {
+  var _this = this;
+
+  setTimeout(function () {
+    console.log('id:', _this.id);
+  }, 100);
+}
+```
+
+### 不适用场合
+
+第一个场合是定义对象的方法，且该方法内部包括`this`。
+
+```javascript
+const cat = {
+  lives: 9,
+  jumps: () => {
+    this.lives--;
+  }
+}
+```
+
+上面代码中，`cat.jumps()`方法是一个箭头函数，这是错误的。调用`cat.jumps()`时，如果是普通函数，该方法内部的`this`指向`cat`；如果写成上面那样的箭头函数，使得`this`指向全局对象，因此不会得到预期结果。这是因为**对象不构成单独的作用域，导致`jumps`箭头函数定义时的作用域就是全局作用域。** 
+
+第二个场合是**需要动态`this`**的时候，也不应使用箭头函数。
+
+```javascript
+var button = document.getElementById('press');
+button.addEventListener('click', () => {
+  // 这里this指向全局对象
+  this.classList.toggle('on');
+});
+```
+
+### 嵌套的箭头函数
+
+```javascript
+function mul(a) {
+  return function(b) {
+    return function(c) {
+      return a * b * c
+    }
+  }
+}
+
+mul(2)(3)(4) // 24
+
+// 箭头函数嵌套
+const mul = (a) => (b) => (c) => a * b * c
+```
+
+下面是一个部署管道机制（pipeline）的例子，即前一个函数的输出是后一个函数的输入。
+
+```javascript
+const pipeline = (...funcs) =>
+  val => funcs.reduce((a, b) => b(a), val);
+
+const plus1 = a => a + 1;
+const mult2 = a => a * 2;
+const addThenMult = pipeline(plus1, mult2);
+
+addThenMult(5)
+// 12
+// 第一次执行plus1(5)，再执行mult2(plus1(5))
+```
+
+------
+
+## 尾调用优化
+
+### 什么是尾调用
+
+尾调用（Tail Call）是函数式编程的一个重要概念，本身非常简单，一句话就能说清楚，就是指**某个函数的最后一步是调用另一个函数**。
+
+```javascript
+function f(x){
+  return g(x);
+}
+```
+
+上面代码中，函数`f`的最后一步是调用函数`g`，这就叫尾调用。
+
+以下三种情况，都不属于尾调用。
+
+```javascript
+// 情况一，调用函数g之后，还有赋值操作
+function f(x){
+  let y = g(x);
+  return y;
+}
+
+// 情况二，和情况一相同，调用后还有操作，即使写在一行内也不算尾调用
+function f(x){
+  return g(x) + 1;
+}
+
+// 情况三，相当于return了undefined，所以也不算是尾调用
+function f(x){
+  g(x);
+  // return undefined
+}
+```
+
+尾调用不一定出现在函数尾部，**只要是最后一步操作即可**。
+
+```javascript
+function f(x) {
+  if (x > 0) {
+    return m(x)
+  }
+  return n(x);
+}
+```
+
+### 尾调用优化
+
+函数调用会在内存形成一个“调用记录”，又称“调用帧”（call frame），保存调用位置和内部变量等信息。如果在函数`A`的内部调用函数`B`，那么在`A`的调用帧上方，还会形成一个`B`的调用帧。等到`B`运行结束，将结果返回到`A`，`B`的调用帧才会消失。如果函数`B`内部还调用函数`C`，那就还有一个`C`的调用帧，以此类推。所有的调用帧，就形成一个**“调用栈”（call stack）**。 
+
+**尾调用由于是函数的最后一步操作，所以不需要保留外层函数的调用帧**，因为调用位置、内部变量等信息都不会再用到了，只要直接用内层函数的调用帧，取代外层函数的调用帧就可以了。
+
+```javascript
+function f() {
+  let m = 1;
+  let n = 2;
+  return g(m + n);
+}
+f();
+
+// 等同于
+function f() {
+  return g(3);
+}
+f();
+
+// 等同于
+g(3);
+```
+
+这就叫做“尾调用优化”（Tail call optimization），即只保留内层函数的调用帧。如果所有函数都是尾调用，那么完全可以做到每次执行时，调用帧只有一项，这将大大节省内存。这就是“尾调用优化”的意义。 
+
+注意，只有不再用到外层函数的内部变量，内层函数的调用帧才会取代外层函数的调用帧，否则就无法进行“尾调用优化”。
+
+```javascript
+function addOne(a){
+  var one = 1;
+  function inner(b){
+    return b + one;
+  }
+  // 内层函数inner用到了外层函数addOne的内部变量one
+  return inner(a);
+}
+```
+
+上面的函数不会进行尾调用优化，因为内层函数`inner`用到了外层函数`addOne`的内部变量`one`。
+
+### 尾递归
+
+函数调用自身，称为递归。如果尾调用自身，就称为尾递归。
+
+递归非常耗费内存，因为需要同时保存成千上百个调用帧，很容易发生“栈溢出”错误（stack overflow）。但对于尾递归来说，由于只存在一个调用帧，所以永远不会发生“栈溢出”错误。
+
+```javascript
+function factorial(n) {
+  if (n === 1) return 1;
+  return n * factorial(n - 1);
+}
+
+factorial(5) // 120
+```
+
+上面代码是一个阶乘函数，计算`n`的阶乘，最多需要保存`n`个调用记录，复杂度 O(n) 。 
+
+如果改写成尾递归，只保留一个调用记录，复杂度 O(1) 。
+
+```javascript
+function factorial(n, total) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+
+factorial(5, 1) // 120
+```
+
+还有一个比较著名的例子，就是计算 Fibonacci 数列，也能充分说明尾递归优化的重要性。
+
+非尾递归的 Fibonacci 数列实现如下。
+
+```javascript
+function Fibonacci (n) {
+  if ( n <= 1 ) {return 1};
+
+  return Fibonacci(n - 1) + Fibonacci(n - 2);
+}
+
+Fibonacci(10) // 89
+Fibonacci(100) // 超时
+Fibonacci(500) // 超时
+```
+
+尾递归优化过的 Fibonacci 数列实现如下。
+
+```javascript
+function Fibonacci2 (n , ac1 = 1 , ac2 = 1) {
+  if( n <= 1 ) {return ac2};
+
+  return Fibonacci2 (n - 1, ac2, ac1 + ac2);
+}
+
+Fibonacci2(100) // 573147844013817200000
+Fibonacci2(1000) // 7.0330367711422765e+208
+Fibonacci2(10000) // Infinity
+```
+
+由此可见，“尾调用优化”对递归操作意义重大，所以一些函数式编程语言将其写入了语言规格。ES6 亦是如此，第一次明确规定，所有 ECMAScript 的实现，都必须部署“尾调用优化”。这就是说，ES6 中只要使用尾递归，就不会发生栈溢出（或者层层递归造成的超时），相对节省内存。
+
+### 递归函数的改写
+
+尾递归的实现，往往需要改写递归函数，确保最后一步只调用自身。做到这一点的方法，就是**把所有用到的内部变量改写成函数的参数**。比如上面的例子，阶乘函数 factorial 需要用到一个中间变量`total`，那就把这个中间变量改写成函数的参数。这样做的缺点就是不太直观，第一眼很难看出来，为什么计算`5`的阶乘，需要传入两个参数`5`和`1`？ 
+
+两个方法可以解决这个问题。方法一是在尾递归函数之外，**再提供一个正常形式的函数**。
+
+```javascript
+function tailFactorial(n, total) {
+  if (n === 1) return total;
+  return tailFactorial(n - 1, n * total);
+}
+
+function factorial(n) {
+  return tailFactorial(n, 1);
+}
+
+factorial(5) // 120
+```
+
+上面代码通过一个正常形式的阶乘函数`factorial`，调用尾递归函数`tailFactorial`，看起来就正常多了。
+
+第二种方法就简单多了，就是采用 ES6 的函数默认值。
+
+```javascript
+function factorial(n, total = 1) {
+  if (n === 1) return total;
+  return factorial(n - 1, n * total);
+}
+
+factorial(5) // 120
+```
+
+### 尾递归优化的实现
+
+尾递归优化只在严格模式下生效，那么正常模式下，就要自己实现尾递归优化。它的原理非常简单。尾递归之所以需要优化，**原因是调用栈太多，造成溢出，那么只要减少调用栈，就不会溢出**，可以采用“循环”换掉“递归”。 
+
+```javascript
+function tco(f) {
+  var value;
+  var active = false;
+  var accumulated = [];
+
+  return function accumulator() {
+    accumulated.push(arguments);
+    if (!active) {
+      active = true;
+      while (accumulated.length) {
+        value = f.apply(this, accumulated.shift());
+      }
+      active = false;
+      return value;
+    }
+  };
+}
+
+var sum = tco(function(x, y) {
+  if (y > 0) {
+    return sum(x + 1, y - 1)
+  }
+  else {
+    return x
+  }
+});
+
+sum(1, 100000)
+// 100001
+```
+
+`tco`函数是尾递归优化的实现，它的奥妙就在于状态变量`active`。默认情况下，这个变量是不激活的。一旦进入尾递归优化的过程，这个变量就激活了。然后，每一轮递归`sum`返回的都是`undefined`，所以就避免了递归执行；而`accumulated`数组存放每一轮`sum`执行的参数，总是有值的，这就保证了`accumulator`函数内部的`while`循环总是会执行。这样就很巧妙地将“递归”改成了“循环”，而后一轮的参数会取代前一轮的参数，保证了调用栈只有一层。 
+

@@ -14,4 +14,5 @@
 * [数值的扩展](es6/number_extension.md)
 * [函数的扩展](es6/func_extension.md)
 * [箭头函数与普通函数this的区别](es6/difference_between_arrow_and_normal_this.md)
+* [数组的扩展](es6/array_extension.md)
 

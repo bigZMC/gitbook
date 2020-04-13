@@ -13,7 +13,7 @@ console.log(1, ...[2, 3, 4], 5)
 // [<div>, <div>, <div>]
 ```
 
-该运算符主要用于函数调用。
+该运算符主要用于函数调用
 
 ```javascript
 function push(array, ...items) {
@@ -48,11 +48,13 @@ const arr = [
 ];
 ```
 
-如果扩展运算符后面是一个空数组，则不产生任何效果。
+如果扩展运算符后面是一个空数组，则**不产生任何效果**，甚至连`undefined`或`empty`都不会产生
 
 ```javascript
 [...[], 1]
 // [1]
+[, 1]
+// [empty, 1]
 
 [...[]]
 // []
@@ -629,7 +631,7 @@ contains(['foo', 'bar'], 'baz'); // => false
 // [1, 2, 4, 5]
 ```
 
-以下是ES5的实现方式
+以下是ES5的两种实现方式
 
 ```javascript
 var flat = function (arr, depth = 1) {
@@ -648,7 +650,7 @@ var flat = function (arr, depth = 1) {
           }
         } else {
           res.push(item)
-          // 查到最后一个元素,重置depthNum
+          // 查到层级最后一个元素,重置depthNum
           if (index === array.length - 1) {
             depthNum = 0
           }
@@ -656,6 +658,25 @@ var flat = function (arr, depth = 1) {
       })
     }
   flatArr(arr)
+  return res
+}
+```
+
+```javascript
+function flat(arr, maxDepth = 1, currentDepth = 0) {
+  let res = []
+  arr.forEach((item, index, array) => {
+    if (Array.isArray(item)) {
+      if (maxDepth > currentDepth) {
+        // 没有达到maxDepth的数组,递归调用flat函数,并将当前层级+1
+        res = [...res, ...flat(item, maxDepth, currentDepth + 1)]
+      } else {
+        res.push(item)
+      }
+    } else {
+      res.push(item)
+    }
+  })
   return res
 }
 ```

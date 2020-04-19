@@ -61,3 +61,36 @@ server.listen(8000)
 
 ------
 
+## 搭建开发环境
+
+- 使用`nodemon`检测文件变化，自动重启`node`
+
+```javascript
+cnpm install --save-dev nodemon
+```
+
+安装好后，修改`package.json`中的命令，使用`nodemon`代替`node`命令，还可以单独进行`nodemon.json`的配置，可以参照[官网]( https://github.com/remy/nodemon/blob/master/doc/sample-nodemon.md )的例子
+
+```javascript
+"scripts": {
+	"dev": "nodemon ./bin/www.js"
+}
+```
+
+- 使用`cross-env`设置环境变量
+
+当我们使用`NODE_ENV = production`来设置环境变量的时候，大多数`windows`命令会提示将会阻塞或者异常，或者`windows`不支持`NODE_ENV=development`的这样的设置方式，会报错。 所以，我们就可以使用`cross-env`命令，这样我们就不必担心平台设置或使用环境变量了。也就是说**`cross-env`能够提供一个设置环境变量的`scripts`，这样我们就能够以`unix`方式设置环境变量，然而在`windows`上也能够兼容的**。 
+
+```javascript
+cnpm install --save-dev cross-env
+```
+
+再次修改`package.json`的命令，设置不同的`NODE_ENV`
+
+```javascript
+"scripts": {
+	"dev": "cross-env NODE_ENV=dev nodemon ./bin/www.js",
+  "prod": "cross-env NODE_ENV=production nodemon ./bin/www.js"
+}
+```
+

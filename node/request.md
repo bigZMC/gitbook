@@ -94,3 +94,78 @@ cnpm install --save-dev cross-env
 }
 ```
 
+------
+
+## 路由开发
+
+- 通过`req.url.split('?')[0]`获取`path(路由)`，根据路由进行函数的匹配调用
+- 通过`req.url.split('?')[1]`获取参数，并使用`queryString.parse()`转换成对象并放在`req.query`中
+- 通过`promise`处理`post data`，并将结果放在`req.body`中
+
+```javascript
+// 处理post data
+const getPostData = (req) => {
+  const promise = new Promise((resolve, reject) => {
+    let postData = ''
+    req.on('data', chunk => {
+      postData += chunk.toString()
+    })
+    req.on('end', () => {
+      resolve(JSON.parse(postData))
+    })
+  })
+  return promise
+}
+```
+
+- 设置`controller`层，定义多个函数并返回，每个函数处理各自的数据
+- 设置`model`层，定义成功与失败的返回数据格式
+
+```javascript
+class BaseModel {
+  constructor(data, message) {
+    // 如果只有一个参数, 只返回message信息
+    if (typeof data === 'string') {
+      this.message = data
+      data = null
+      message = null
+    }
+    if (data) {
+      this.data = data
+    }
+    if (message) {
+      this.message = message
+    }
+  }
+}
+
+class SuccessModel extends BaseModel {
+  constructor(data, message) {
+    super(data, message)
+    this.errno = 0
+  }
+}
+
+class ErrorModel extends BaseModel {
+  constructor(data, message) {
+    super(data, message)
+    this.errno = -1
+  }
+}
+
+module.exports  = {
+  SuccessModel,
+  ErrorModel
+}
+```
+
+- 设置未命中路由，返回`404`
+
+```javascript
+res.writeHead(404, {
+	"Content-type": "text/plain"
+})
+res.write("404 Not Fount\n")
+res.end()
+```
+

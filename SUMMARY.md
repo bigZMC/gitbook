@@ -19,3 +19,7 @@
 * [对象的扩展](es6/object_extension.md)
 * [对象的新增方法](es6/object_new_func.md)
 
+## 初学R语言([大数据之R语言速成与实战]( https://edu.aliyun.com/course/27?utm_content=m_24068&accounttraceid=65fca87028164ecabf0368f5049c9976onlf&spm=5176.12901015.0.i12901015.7896525cVeWri6 ))
+
+- [准备工作](R/prepare.md)
+

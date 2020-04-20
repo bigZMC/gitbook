@@ -17,4 +17,5 @@
 * [箭头函数与普通函数this的区别](es6/difference_between_arrow_and_normal_this.md)
 * [数组的扩展](es6/array_extension.md)
 * [对象的扩展](es6/object_extension.md)
+* [对象的新增方法](es6/object_new_func.md)
 

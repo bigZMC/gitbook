@@ -166,3 +166,154 @@ patientsData <- data.frame(patientID, age, diabetes, status)
 # 4         4  52    TYPE1      Poor
 ```
 
+可以通过列下标或者列名取值
+
+```R
+patientsData[1:2]
+#   patientID age
+# 1         1  25
+# 2         2  34
+# 3         3  28
+# 4         4  52
+
+patientsData[c('diabetes', 'status')]
+#   diabetes    status
+# 1 TYPE1      Poor
+# 2 TYPE2  Improved
+# 3 TYPE1 Excellent
+# 4 TYPE1      Poor
+```
+
+如果只想单独取一列，有两种方法
+
+- 通过`$`符号对单独某一列取值
+- **使用`attact()`函数将数据框加入`R`的搜索路径**，然后直接输入列名即可获得单独某一列的值
+
+```R
+# $符号取值
+patientsData$age # 25 34 28 52
+
+# attach()函数
+attach(patientsData) # 将patientsData加入R搜索路径
+age # 25 34 28 52
+patientID # 1 2 3 4
+```
+
+还可以**通过`detach()`将数据框从R的搜索路径中移除**
+
+```R
+detach(patientsData) # 将patientsData从R搜索路径中移除
+age # object 'age' not found
+```
+
+最后，还可以通过`with()`函数来快速访问数据框的某一列。**注意`with()`函数的大括号会形成一个作用域**，内部的变量不能在外层访问，**如果需要创建在`with()`以外的对象，使用`<<-`代替`<-`进行赋值**。
+
+```R
+with(patientsData, {
+  scopeAge <- age # 将数据框中age列赋值给scopeAge
+  scopeAge # 输出scopeAge
+  scopePatientID <<- patientID
+})
+
+scopeAge # object 'scopeAge' not found
+scopePatientID # 1 2 3 4
+```
+
+------
+
+## 因子
+
+`R`把表示分类的数据称为因子(`factor`)，因子具有因子水平(`level`)，用于限制因子的元素的取值范围。 
+
+```R
+# 语法
+factor(x = character(), levels, labels = levels, exclude = NA, ordered = is.ordered(x), nmax = NA)
+```
+
+- x 向量，因子的数据源
+- levels 水平，字符类型，用于设置`x`可能包含的唯一值，**默认是`x`的所有唯一值**。如果x不是字符向量，则用`as.character(x)`把`x`转换为字符向量。
+- labels `level`的标签，字符类型，对因子水平重命名
+- exclude 排除的字符
+- ordered 逻辑值(`TRUE/FALSE`)，用于指定水平是否有序
+- nmax 水平的上限数量
+
+注意：通常情况下，在创建数据框时，**`R`隐式地把数据类型为字符的列创建为因子**
+
+```R
+class(patientsData$diabetes) # factor
+```
+
+### 因子水平
+
+因为因子水平规定了因子的取值范围，每一个因子，都包含了水平信息。如果想单独查看因子水平，可以通过`levels()`函数来查看。
+
+```R
+patientsData$diabetes
+# TYPE1 TYPE2 TYPE1 TYPE1
+# Levels: TYPE1 TYPE2
+
+patientsData$diabetes[1]
+# TYPE1
+# Levels: TYPE1 TYPE2
+
+levels(patientsData$diabetes)
+# TYPE1 TYPE2
+```
+
+可以看到，因子水平是`TYPE1`和`TYPE2`，如果把其他字符添加到`diabetes`列，`R`会抛出警告信息，并将错误赋值的元素设置为`NA`
+
+```R
+patientsData$diabetes[1] <- 'TYPE3'
+# Warning message:
+# In `[<-.factor`(`*tmp*`, 2, value = c(NA, 1L, 1L, 1L)) :
+# invalid factor level, NA generated
+
+patientsData$diabetes[1] # <NA>
+```
+
+在创建因子时，可以使用`labels`为每个因子水平添加标签，字符顺序要和`levels`参数的字符顺序一致
+
+```R
+sex <- factor(c('f','m','f','f','m'), levels=c('f','m'), labels=c('female','male'))
+
+# female male female female male
+# Levels: female male
+```
+
+### 有序因子
+
+通常情况下，因子是无序的，可以通过`is.ordered()`函数判断
+
+```R
+is.ordered(sex) # FALSE
+```
+
+我们可以通过以下两种方法创建有序因子
+
+- `ordered()`函数，缺点是不能指定特定因子水平的顺序
+
+```R
+ordered(sex)
+# female male female female male
+# Levels: female < male
+```
+
+- 在使用`factor()`函数创建时，添加`ordered=TRUE`参数
+
+```R
+sex <- factor(c('f','m','f','f','m'), levels=c('f','m'), ordered=TRUE)
+
+# f m f f m
+# Levels: f < m
+
+# 如果一开始没有使用ordered=TRUE,也可以重新指定
+sex <- factor(sex, levels=c('m','f'), ordered=TRUE)
+
+# f m f f m
+# Levels: m < f
+```
+
+------
+
+## 列表
+

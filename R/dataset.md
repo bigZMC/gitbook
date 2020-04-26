@@ -317,3 +317,121 @@ sex <- factor(sex, levels=c('m','f'), ordered=TRUE)
 
 ## 列表
 
+列表**包含不同类型**的元素，通过`list()`函数进行创建，列表能整合若干(可能无关的)对象到单个对象名下。例如，某个列表中可能是若干向量、矩阵、数据框，甚至是其他列表的组合。
+
+从技术上讲，列表就是向量。之前我们接触过的**普通向量都称为“原子型(atomic)”向量**，就是说，向量的元素已经是 最小的、不可再分的。而**列表则属于“递归型(recursive)”向量**。 
+
+```R
+# 语法
+list(key1=object1, key2=object2, ...)
+```
+
+下面是一些例子
+
+```R
+mylist <- list(id=27, name='TOM', scores=c(10, 15, 13))
+# $id
+# [1] 27
+
+# $name
+# [1] "TOM"
+
+# $scores
+# [1] 10 15 13
+```
+
+我们通常**通过双中括号(`[[]]`)的形式取值**，这是因为`list`类型的元素被看作是一个子列表，只有用双中括号才能取到相应的值
+
+```R
+mylist[1]
+# $id
+# [1] 27
+mode(mylist[1]) # list
+
+mylist[[1]] # 27
+mode(mylist[[1]]) # numeric
+
+# 还可以用$符号快速取值,和数据框语法一致
+mylist$id # 27
+```
+
+通过`names`函数获得列表所有元素的名称
+
+```R
+names(mylist) # id name scores
+
+# 还可以直接对names(mylist)赋值,修改名称
+names(mylist) <- c('id', 'name', 'marks')
+
+mylist
+# $id
+# [1] 27
+
+# $name
+# [1] "TOM"
+
+# $marks
+# [1] 10 15 13
+```
+
+对列表可以取出某一列进行赋值，如果列名存在就修改列值，如果不存在就是添加一个元素
+
+```R
+mylist$id <- 1
+mylist$parents <- c('Mama', 'Baba')
+
+mylist
+# $id
+# [1] 1
+
+# $name
+# [1] "TOM"
+
+# $scores
+# [1] 10 15 13
+
+# $parents
+# [1] "Mama" "Baba"
+```
+
+还可以通过`c()`函数合并两个列表
+
+```R
+otherlist <- list(age=20, sex='male')
+
+otherlist
+# $age
+# [1] 20
+
+# $sex
+# [1] "male"
+
+lt <- c(mylist, otherlist)
+# $id
+# [1] 1
+
+# $name
+# [1] "TOM"
+
+# $scores
+# [1] 10 15 13
+
+# $parents
+# [1] "Mama" "Baba"
+
+# $scores
+# [1] 10 15 13
+
+# $parents
+# [1] "Mama" "Baba"
+```
+
+列表还能转换成向量的元素，使用`unlist()`函数展开列表
+
+```R
+unlist(lt)
+
+# id  name  scores1 scores2 scores3 parents1 parents2 age  sex 
+# "1" "TOM" "10"    "15"    "13"    "Mama"   "Baba"   "20" "male" 
+```
+

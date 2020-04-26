@@ -19,6 +19,7 @@
 * [数组的扩展](es6/array_extension.md)
 * [对象的扩展](es6/object_extension.md)
 * [对象的新增方法](es6/object_new_func.md)
+* [对象的常用方法整理](es6/object_func.md)
 
 ## R语言实战
 

@@ -5,6 +5,7 @@
 * [NVM](node/nvm.md) 
 * [接口开发](node/request.md)
 * [数据存储(MYSQL)](node/db.md)
+* [登录校验和信息存储](node/login.md)
 
 ## ES6标准入门
 

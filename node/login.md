@@ -24,3 +24,4 @@ res.setHeader('Set-Cookie', `username=zmc;path=/;httpOnly;expires=${getCookieExp
 // path 指定cookie生效的路由
 // expires 设置过期时间,不设置默认浏览器关闭时销毁cookie
 ```
+

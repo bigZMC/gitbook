@@ -26,3 +26,5 @@
 
 - [准备工作](R/prepare.md)
 - [数据集](R/dataset.md)
+- [导入数据源](R/import.md)
+- [自定义函数](R/function.md)

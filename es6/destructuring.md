@@ -58,7 +58,7 @@ let [foo] = null;
 let [foo] = {};
 ```
 
-反之，**只要某种数据解构具有Iterator解构，都可以采用数组形式的解构赋值**。
+反之，**只要某种数据解构具有`Iterator`接口，都可以采用数组形式的解构赋值**。
 
 ### 默认值
 
@@ -72,7 +72,7 @@ let [x, y = 'b'] = ['a']; // x='a', y='b'
 let [x, y = 'b'] = ['a', undefined]; // x='a', y='b'
 ```
 
- 注意，ES6 内部使用严格相等运算符（`===`），判断一个位置是否有值。  所以，只有当一个数组成员严格等于`undefined`，默认值才会生效。 
+ 注意，`ES6`内部使用严格相等运算符（`===`），判断一个位置是否有值。  所以，只有当一个数组成员严格等于`undefined`，默认值才会生效。 
 
 ```javascript
 let [x = 1] = [undefined];
@@ -82,7 +82,7 @@ let [x = 1] = [null];
 x // null
 ```
 
-注意：默认值是一个表达式的话，那么这个表达式是惰性求值的，即只有在用到的时候，才会求值
+注意：默认值是一个表达式的话，那么这个表达式是**惰性求值**的，即只有在用到的时候，才会求值
 
 ```javascript
 function f() {
@@ -114,8 +114,8 @@ let [x = 1, y = x] = [2];    // x=2; y=2
 
 ```javascript
 let { foo, bar } = { foo: 'aaa', bar: 'bbb' };
-foo // "aaa"
-bar // "bbb"
+foo // 'aaa'
+bar // 'bbb'
 ```
 
 对象的解构和数组有一个重要的不同。数组的元素是次序排列的；而对象的属性没有次序，变量必须和属性同名，才能取到正确的值。
@@ -176,7 +176,7 @@ obj // {prop:123}，obj声明的时候是{}，解构的时候根据等式右边�
 arr // [true]，和对象解构同理，声明的时候是空数组
 ```
 
-如果解构模式是嵌套的对象，而且子对象所在的父属性不存在，那么将会报错。因为**内部机制是先找到同名属性**，因为找不到的时候是undefined，再向下找子属性就会报错。
+如果解构模式是嵌套的对象，而且子对象所在的父属性不存在，那么将会报错。因为**内部机制是先找到同名属性**，因为找不到的时候是`undefined`，再向下找子属性就会报错。
 
 ```javascript
 // 报错，此时foo为undefined，foo.bar就会报错
@@ -206,7 +206,7 @@ var { message: msg = 'Something went wrong' } = {};
 msg // "Something went wrong"
 ```
 
-和数组设置默认值一样，生效条件是，对象的属性值严格等于undefined
+和数组设置默认值一样，生效条件是，对象的属性值严格等于`undefined`
 
 ```javascript
 var {x = 3} = {x: undefined};
@@ -387,18 +387,18 @@ jQuery.ajax = function (url, {
 - 遍历Map结构
 
 ```javascript
-const map = new Map();
-map.set('first', 'hello');
-map.set('second', 'world');
+const map = new Map()
+map.set('first', 'hello')
+map.set('second', 'world')
 
 for (let item of map) {
-  console.log(item);
+  console.log(item)
 }
-// ["first", "hello"]
-// ["second", "world"]
+// ['first', 'hello']
+// ['second', 'world']
 
 for (let [key, value] of map) {
-  console.log(key + " is " + value);
+  console.log(key + ' is ' + value)
 }
 // first is hello
 // second is world

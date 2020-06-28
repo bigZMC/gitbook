@@ -443,7 +443,7 @@ map.set(NaN, 5).set(NaN, 6)
 map.get(NaN) // 6
 ```
 
-### Set实例的属性和方法
+### Map实例的属性和方法
 
 **属性**
 
@@ -628,4 +628,99 @@ function objToStrMap(obj) {
 ```
 
 ---
+
+## WeakMap
+
+`WeakMap`结构和`Map`结构类似，也是用于生成键值对的集合。它们之间有两点差别
+
+1. `WeakMap`只接受对象作为键名(`null`除外)
+
+```javascript
+const wm = new WeakMap()
+wm.set(1, 2)
+// TypeError: 1 is not an object
+
+wm.set(Symbol(), 2)
+// TypeError: Invalid value used as weak map key
+
+wm.set(null, 2)
+// TypeError: Invalid value used as weak map key
+```
+
+2. `WeakMap`的**键名所指向的对象**，不计入垃圾回收机制
+
+`WeakMap`的**键名所引用的对象都是弱引用**，这一点和`WeakSet`的值是弱引用相同，垃圾回收机制不将该引用考虑在内。只要所引用的对象的其他引用被清除，垃圾回收机制就会释放该对象所占用的内存。
+
+因为`弱引用`的这个特点，`WeakMap`的使用场景是，它的键所对应的对象，可能会在将来消失。`WeakMap`结构有助于防止内存泄漏。
+
+注意，**`WeakMap`弱引用的只有键名，而不是键值**。
+
+```javascript
+const wm = new WeakMap()
+let key = {}
+let obj = {foo: 1}
+
+wm.set(key, obj)
+obj = null
+wm.get(key)
+// Object {foo: 1}
+// 键值obj是正常引用,即使外部消除了obj的引用,WeakMap内部引用依然存在
+```
+
+**操作方法**
+
+和`WeakSet`相同，由于弱引用的关系，键名是否存在不可预测。因此，没有遍历操作，也没有`size`属性。可用的方法只有`get()`，`set()`，`has()`，`delete()`，使用方法和`Map`相同
+
+```javascript
+const wm = new WeakMap()
+
+wm.size // undefined
+wm.forEach // undefined
+wm.clear // undefined
+```
+
+**用途**
+
+1. 将`DOM`节点作为键名，一旦`DOM`节点被删除，对应的键就会被删除，不存在内存泄漏
+
+```javascript
+const wm = new WeakMap()
+
+wm.set(
+	document.getElementById('logo'),
+  {timesClicked: 0}
+)
+
+document.getElementById('logo').addEventListener('click', function(){
+  let logoData = wm.get(document.getElementById('logo'))
+  logoData.timesClicked++
+}, false)
+```
+
+2. 部署私有属性
+
+```javascript
+const _counter = new WeakMap()
+const _action = new WeakMap()
+
+class Countdown {
+  constructor(counter, action) {
+    _counter.set(this, counter)
+    _action.set(this, action)
+  },
+  dec() {
+    let counter = _counter.get(this)
+    if(counter < 1) return
+    _counter.set(this, --counter)
+    if(counter === 0) {
+      _aciton.get(this)()
+    }
+  }
+}
+
+const c = new Countdown(2, () => console.log('DONE'))
+
+c.dec()
+c.dec() // 'DONE'
+```
 

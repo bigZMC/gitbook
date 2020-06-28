@@ -22,6 +22,7 @@
 * [对象的新增方法](es6/object_new_func.md)
 * [对象的常用方法整理](es6/object_func.md)
 * [Symbol](es6/symbol.md)
+* [Set和Map数据结构](es6/set&map.md)
 
 ## R语言实战
 

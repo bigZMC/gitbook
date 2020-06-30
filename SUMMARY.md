@@ -23,6 +23,7 @@
 * [对象的常用方法整理](es6/object_func.md)
 * [Symbol](es6/symbol.md)
 * [Set和Map数据结构](es6/set&map.md)
+* [Proxy](es6/proxy.md)
 
 ## R语言实战
 

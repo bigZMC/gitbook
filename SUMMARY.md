@@ -24,6 +24,7 @@
 * [Symbol](es6/symbol.md)
 * [Set和Map数据结构](es6/set&map.md)
 * [Proxy](es6/proxy.md)
+* [Reflect](es6/reflect.md)
 
 ## R语言实战
 

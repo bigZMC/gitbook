@@ -334,3 +334,242 @@ Promise.resolve(2).finally(() => {})
 
 ## Promise.all()
 
+`Promise.all()`方法用于将多个`Promise`实例，包装成一个新的`Promise`实例。接受一个**数组(或者不是数组，但是必须具有`Iterator`接口)**作为参数，**数组中的元素均是`Promise`实例**，如果不是，先调用`Promise.resolve()`方法转成`Promise`实例。
+
+```javascript
+const p = Promise.all([p1, p2, p3])
+```
+
+- 如果`p1`，`p2`，`p3`的状态都变成`fulfilled`，`p`的状态才变成`fulfilled`，返回值组成一个数组传递给`then`函数
+- 如果`p1`，`p2`，`p3`之中有一个被`rejected`，`p`的状态就变成`rejected`，并将第一个被`rejected`的实例返回值，传给`p`的`catch`函数
+
+注意，作为参数的`Promise`实例，**自己定义了`catch`方法，一旦被`rejected`，并不会触发`Promise.all`方法的`catch`**
+
+```javascript
+const p1 = new Promise(function(resolve, reject) {
+  resolve('hello')
+}).then(result => result)
+	.catch(e => e)
+
+const p2 = new Promise(function(resolve, reject) {
+  throw new Error('test')
+}).then(result => result)
+	.catch(e => e) // 这里需要注意,如果catch没有返回值,Promise.all()结果变成['hello', undefined]
+
+Promise.all([p1, p2])
+  .then(result => console.log(result))
+	.catch(e => console.log(e))
+// ['hello', Error: test]
+```
+
+上面代码中，`p2`会`rejected`，但是被自身的`catch`方法捕获，由于`catch`方法返回值也是一个`Promise`实例，导致该实例执行完`catch`方法后，也会变成`resolved`。因此`Promise.all`方法会调用`then`方法。
+
+如果`p2`没有自己的`catch`方法，就会调用`Promise.all`的`catch`方法
+
+```javascript
+const p1 = new Promise(function(resolve, reject) {
+  resolve('hello')
+}).then(result => result)
+	.catch(e => e)
+
+const p2 = new Promise(function(resolve, reject) {
+  throw new Error('test')
+}).then(result => result)
+
+Promise.all([p1, p2])
+  .then(result => console.log(result))
+	.catch(e => console.log(e))
+// Error: test
+```
+
+---
+
+## Promise.race()
+
+`Promise.race()`方法用于将多个`Promise`实例，包装成一个新的`Promise`实例。和`Promise.all`方法相反，**只要参数数组中的某一个实例改变状态，那么`Promise.race`的状态以及返回值就跟这个实例相同。**
+
+下面是一个例子，指定时间没有获得结果就返回错误信息
+
+```javascript
+const p = Promise.race([
+  fetch('/http-request-url'),
+  new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error('request timeout')), 5000)
+  })
+])
+
+p.then(console.log)
+ .catch(console.error)
+```
+
+---
+
+## Promise.allSettled()
+
+`Promise.allSettled`方法参数和以上两种方法一致，同样返回一个`Promise`实例。**只有等所有这些参数实例都返回结果，才会结束。**
+
+`Promise.allSettled`一旦结束，**状态总是`fulfilled`**，不管参数中的返回值是成功还是失败。它的`then`函数也是一个数组，**每个成员都是一个对象，包含`status`，`value`或`reason`属性**。`status`属性只有两个值，`fulfilled`和`rejected`，分别又对应了`value`和`reason`属性。
+
+```javascript
+const resolved = Promise.resolve(42)
+const rejected = Promise.reject(-1)
+
+const allSettledPromise = Promise.allSettled([resolved, rejected])
+
+allSettledPromise.then(result => console.log(result))
+// [
+//    { status: 'fulfilled', value: 42 },
+//    { status: 'rejected', reason: -1 }
+// ]
+```
+
+下面是一个实例，过滤成功和失败的请求
+
+```javascript
+const promises = [ fetch('index.html'), fetch('does-not-exist-url') ]
+const results = Promise.allSettled(promises)
+
+// 过滤成功请求
+const successfulPromises = results.filter(p => p.status === 'fulfilled')
+
+// 过滤失败请求,并输出原因
+const errors = results.filter(p => p.status === 'rejected')
+										.map(p => p.reason)
+```
+
+有时候，我们**不关心异步结果，只关心是否都完成**，这个时候用`Promise.allSettled`就很合适。如果是`Promise.all`，会出现某一个参数实例请求失败，其他请求还没结果的情况。除非其中的所有参数实例都定了catch函数捕获异常，确保不会触发`Promise.all`的`catch`方法。
+
+---
+
+## Promise.resolve()
+
+`Promise.resolve()`方法是为了将现有对象转为`Promise`对象
+
+```javascript
+Promise.resolve('foo')
+
+// 等价于
+new Promise(resolve => resolve('foo'))
+```
+
+参数分为以下四种情况
+
+1. 参数是一个`Promise`实例
+
+不做任何操作，原封不动地返回这个实例
+
+2. 参数是一个`thenable`对象
+
+`thenable`对象表示对象具有`then`方法
+
+```javascript
+let thenable = {
+  then: function(resolve, reject) {
+    resolve(42)
+  }
+}
+```
+
+`Promise.resolve`方法会将对象转为`Promise`对象，并立即执行`thenable`对象的`then`方法
+
+```javascript
+let p = Promise.resolve(thenale)
+p.then(function(value) {
+  console.log(value)
+})
+// 42
+```
+
+`thenable`被转为`Promise`对象，执行`then`方法，`p`的状态被改为`fulfilled`，从而立即执行`p`的`then`函数
+
+3. 参数不是具有`thenable`方法的对象，或者根本就不是对象
+
+返回一个`Promise`对象，状态为`resolved`
+
+```javascript
+const p = Promise.resolve('hello') // 不是对象,状态是resolve,执行对象p的then方法
+
+p.then(result => console.log(result))
+// 'hello'
+```
+
+4. 不带任何参数
+
+直接返回一个状态为`resolved`的`Promise`对象
+
+```javascript
+const p = Promise.resolve()
+
+p.then(function () {
+  // do sth
+})
+```
+
+重点注意，**立即`resolve()`的`Promise`对象，在本轮`"事件循环"`结束时执行**，而`setTimeout(fn, 0)`是在下一轮`"事件循环"`开始时执行
+
+```javascript
+setTimeout(() => console.log(1), 0) // 下轮事件循环开始执行,在这里最后执行
+
+Promise.resolve().then(() => console.log(2)) // 本轮事件循环后执行
+
+console.log(3) // 立即执行
+// 3
+// 2
+// 1
+```
+
+---
+
+## Promise.reject()
+
+`Promise.reject()`和`Promise.resolve()`用法相同，状态相反
+
+```javascript
+const p = Promise.reject('Error') 
+// 等价于
+const p = new Promise((resolve, reject) => reject('Error'))
+
+p.catch(reason => console.log(reason))
+// 'Error'
+```
+
+`Promise.reject()`的参数，会直接作为`reject`参数，和`Promise.resolve`参数不一致
+
+```javascript
+const thenable = {
+  then(resolve, reject) {
+    reject('Error')
+  }
+}
+
+Promise.reject(thenable)
+.catch(e => {
+  console.log(e === thenable)
+})
+// true, Promise.reject的参数就是其catch方法的参数
+```
+
+---
+
+## 应用
+
+### 图片加载
+
+```javascript
+function loadImageAsync(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    
+    image.onload = function() {
+      resolve(iamge)
+    }
+    
+    image.onerror = function() {
+      reject(new Error(`Could not load iamge at ${url}`))
+    }
+    
+    image.src = url
+  })
+}
+```
+

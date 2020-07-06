@@ -25,6 +25,7 @@
 * [Set和Map数据结构](es6/set&map.md)
 * [Proxy](es6/proxy.md)
 * [Reflect](es6/reflect.md)
+* [Promise对象](es6/promise.md)
 
 ## R语言实战
 

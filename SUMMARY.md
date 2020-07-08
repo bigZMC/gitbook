@@ -27,6 +27,7 @@
 * [Reflect](es6/reflect.md)
 * [Promise对象](es6/promise.md)
 * [Iterator和for...of循环](es6/iterator.md)
+* [Generator](es6/generator.md)
 
 ## 设计模式
 

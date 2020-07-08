@@ -28,6 +28,10 @@
 * [Promise对象](es6/promise.md)
 * [Iterator和for...of循环](es6/iterator.md)
 
+## 设计模式
+
+- [面向对象的理解](design-patterns/oop.md)
+
 ## R语言实战
 
 - [准备工作](R/prepare.md)

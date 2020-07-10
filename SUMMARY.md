@@ -28,6 +28,7 @@
 * [Promise对象](es6/promise.md)
 * [Iterator和for...of循环](es6/iterator.md)
 * [Generator](es6/generator.md)
+* [Generator函数的异步应用](es6/generator_async.md)
 
 ## 设计模式
 
